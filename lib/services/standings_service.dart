@@ -15,8 +15,12 @@ class StandingsService {
     205: 'National League Central',
   };
 
+  /// The season year fetchStandings() queries — MLB always shows the
+  /// current calendar year's season.
+  static int currentSeason() => DateTime.now().year;
+
   static Future<List<StandingsDivision>> fetchStandings() async {
-    final season = DateTime.now().year;
+    final season = currentSeason();
     final url = Uri.parse(
       'https://statsapi.mlb.com/api/v1/standings'
       '?leagueId=103,104&season=$season&standingsTypes=regularSeason',

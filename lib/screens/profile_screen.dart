@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/league.dart';
 import '../models/stadium.dart';
 import '../services/notification_service.dart';
 import '../services/profile_service.dart';
@@ -49,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final teamNames = kStadiums.map((s) => s.team).toList()..sort();
+    final teams = [...kStadiums]..sort((a, b) => a.team.compareTo(b.team));
     return Scaffold(
       appBar: AppBar(title: const Text('Your profile')),
       body: ListView(
@@ -78,8 +79,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text('None selected'),
                 ),
-                items: teamNames
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                items: teams
+                    .map((s) => DropdownMenuItem(
+                          value: s.team,
+                          child: Text('${s.team} (${s.league.emoji} ${s.league.label})'),
+                        ))
                     .toList(),
                 onChanged: (v) => setState(() => _favoriteTeam = v),
               ),

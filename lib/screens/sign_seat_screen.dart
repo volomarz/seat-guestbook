@@ -5,9 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/signature.dart';
 import '../models/stadium.dart';
-import '../services/mlb_stats_service.dart';
 import '../services/profile_service.dart';
 import '../services/signatures_store.dart';
+import '../services/sports_service.dart';
 import '../services/storage_service.dart';
 import '../theme.dart';
 
@@ -142,7 +142,7 @@ class _SignSeatScreenState extends State<SignSeatScreen> {
       }
 
       final gameSummary =
-          await MlbStatsService.fetchGameSummary(widget.stadium.id, dateStr);
+          await SportsService.fetchGameSummary(widget.stadium, dateStr);
 
       final sig = SeatSignature(
         id: id,

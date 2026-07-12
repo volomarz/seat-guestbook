@@ -2,8 +2,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import '../models/league.dart';
 import '../models/stadium.dart';
-import 'mlb_stats_service.dart';
+import 'sports_service.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
@@ -57,7 +58,7 @@ class NotificationService {
     }
     if (stadium == null) return;
 
-    final nextGame = await MlbStatsService.fetchNextGame(stadium.id);
+    final nextGame = await SportsService.fetchNextGame(stadium);
     if (nextGame == null) return;
 
     final reminderTime = nextGame.dateTime.subtract(const Duration(hours: 3));
@@ -65,7 +66,7 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       id: _reminderId,
-      title: 'Game day! \u26be',
+      title: 'Game day! ${stadium.league.emoji}',
       body: '${nextGame.title} today \u2014 don\'t forget to sign your seat!',
       scheduledDate: tz.TZDateTime.from(reminderTime, tz.local),
       notificationDetails: const NotificationDetails(

@@ -1,12 +1,12 @@
 import '../models/stadium.dart';
 import '../models/venue_event.dart';
-import 'mlb_stats_service.dart';
+import 'sports_service.dart';
 import 'ticketmaster_service.dart';
 
 class NextEventService {
   static Future<VenueEvent?> fetchNextEvent(Stadium stadium) async {
     final results = await Future.wait([
-      MlbStatsService.fetchNextGame(stadium.id),
+      SportsService.fetchNextGame(stadium),
       TicketmasterService.fetchNextEvent(stadium.name, stadium.city),
     ]);
     final game = results[0];

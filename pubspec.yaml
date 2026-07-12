@@ -1,5 +1,5 @@
 name: seat_guestbook
-description: A ballpark seat guestbook — sign seats at every MLB stadium with a photo.
+description: A seat guestbook — sign seats at MLB and NFL venues with a photo.
 publish_to: 'none'
 version: 1.0.0+1
 

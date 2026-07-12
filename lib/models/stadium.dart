@@ -1,18 +1,22 @@
+import 'league.dart';
+
 class Stadium {
   final String id;
   final String name;
   final String team;
   final String city;
+  final League league;
 
   const Stadium({
     required this.id,
     required this.name,
     required this.team,
     required this.city,
+    this.league = League.mlb,
   });
 }
 
-final List<Stadium> kStadiums = [
+final List<Stadium> kMlbStadiums = [
   Stadium(id: 'american-family-field', name: 'American Family Field', team: 'Milwaukee Brewers', city: 'Milwaukee, WI'),
   Stadium(id: 'angel-stadium', name: 'Angel Stadium', team: 'Los Angeles Angels', city: 'Anaheim, CA'),
   Stadium(id: 'busch-stadium', name: 'Busch Stadium', team: 'St. Louis Cardinals', city: 'St. Louis, MO'),
@@ -44,3 +48,48 @@ final List<Stadium> kStadiums = [
   Stadium(id: 'wrigley-field', name: 'Wrigley Field', team: 'Chicago Cubs', city: 'Chicago, IL'),
   Stadium(id: 'yankee-stadium', name: 'Yankee Stadium', team: 'New York Yankees', city: 'Bronx, NY'),
 ]..sort((a, b) => a.team.compareTo(b.team));
+
+// NFL stadium names current as of the 2026 season. Two pairs of teams share
+// a physical venue (SoFi Stadium: Rams/Chargers, MetLife Stadium: Giants/
+// Jets) — each tenant gets its own browsable entry here since our data model
+// is one-team-per-entry, so a seat signed during a Rams game and a seat
+// signed during a Chargers game at the same physical seat will show up as
+// two separate "stadiums" rather than one shared one. Worth revisiting if
+// that distinction ever bothers users.
+final List<Stadium> kNflStadiums = [
+  Stadium(id: 'state-farm-stadium', name: 'State Farm Stadium', team: 'Arizona Cardinals', city: 'Glendale, AZ', league: League.nfl),
+  Stadium(id: 'mercedes-benz-stadium', name: 'Mercedes-Benz Stadium', team: 'Atlanta Falcons', city: 'Atlanta, GA', league: League.nfl),
+  Stadium(id: 'mt-bank-stadium', name: 'M&T Bank Stadium', team: 'Baltimore Ravens', city: 'Baltimore, MD', league: League.nfl),
+  Stadium(id: 'highmark-stadium', name: 'Highmark Stadium', team: 'Buffalo Bills', city: 'Orchard Park, NY', league: League.nfl),
+  Stadium(id: 'bank-of-america-stadium', name: 'Bank of America Stadium', team: 'Carolina Panthers', city: 'Charlotte, NC', league: League.nfl),
+  Stadium(id: 'soldier-field', name: 'Soldier Field', team: 'Chicago Bears', city: 'Chicago, IL', league: League.nfl),
+  Stadium(id: 'paycor-stadium', name: 'Paycor Stadium', team: 'Cincinnati Bengals', city: 'Cincinnati, OH', league: League.nfl),
+  Stadium(id: 'huntington-bank-field', name: 'Huntington Bank Field', team: 'Cleveland Browns', city: 'Cleveland, OH', league: League.nfl),
+  Stadium(id: 'att-stadium', name: 'AT&T Stadium', team: 'Dallas Cowboys', city: 'Arlington, TX', league: League.nfl),
+  Stadium(id: 'empower-field', name: 'Empower Field at Mile High', team: 'Denver Broncos', city: 'Denver, CO', league: League.nfl),
+  Stadium(id: 'ford-field', name: 'Ford Field', team: 'Detroit Lions', city: 'Detroit, MI', league: League.nfl),
+  Stadium(id: 'lambeau-field', name: 'Lambeau Field', team: 'Green Bay Packers', city: 'Green Bay, WI', league: League.nfl),
+  Stadium(id: 'nrg-stadium', name: 'NRG Stadium', team: 'Houston Texans', city: 'Houston, TX', league: League.nfl),
+  Stadium(id: 'lucas-oil-stadium', name: 'Lucas Oil Stadium', team: 'Indianapolis Colts', city: 'Indianapolis, IN', league: League.nfl),
+  Stadium(id: 'everbank-stadium', name: 'EverBank Stadium', team: 'Jacksonville Jaguars', city: 'Jacksonville, FL', league: League.nfl),
+  Stadium(id: 'arrowhead-stadium', name: 'Arrowhead Stadium', team: 'Kansas City Chiefs', city: 'Kansas City, MO', league: League.nfl),
+  Stadium(id: 'allegiant-stadium', name: 'Allegiant Stadium', team: 'Las Vegas Raiders', city: 'Las Vegas, NV', league: League.nfl),
+  Stadium(id: 'sofi-stadium-chargers', name: 'SoFi Stadium', team: 'Los Angeles Chargers', city: 'Inglewood, CA', league: League.nfl),
+  Stadium(id: 'sofi-stadium-rams', name: 'SoFi Stadium', team: 'Los Angeles Rams', city: 'Inglewood, CA', league: League.nfl),
+  Stadium(id: 'hard-rock-stadium', name: 'Hard Rock Stadium', team: 'Miami Dolphins', city: 'Miami Gardens, FL', league: League.nfl),
+  Stadium(id: 'us-bank-stadium', name: 'U.S. Bank Stadium', team: 'Minnesota Vikings', city: 'Minneapolis, MN', league: League.nfl),
+  Stadium(id: 'gillette-stadium', name: 'Gillette Stadium', team: 'New England Patriots', city: 'Foxborough, MA', league: League.nfl),
+  Stadium(id: 'caesars-superdome', name: 'Caesars Superdome', team: 'New Orleans Saints', city: 'New Orleans, LA', league: League.nfl),
+  Stadium(id: 'metlife-stadium-giants', name: 'MetLife Stadium', team: 'New York Giants', city: 'East Rutherford, NJ', league: League.nfl),
+  Stadium(id: 'metlife-stadium-jets', name: 'MetLife Stadium', team: 'New York Jets', city: 'East Rutherford, NJ', league: League.nfl),
+  Stadium(id: 'lincoln-financial-field', name: 'Lincoln Financial Field', team: 'Philadelphia Eagles', city: 'Philadelphia, PA', league: League.nfl),
+  Stadium(id: 'acrisure-stadium', name: 'Acrisure Stadium', team: 'Pittsburgh Steelers', city: 'Pittsburgh, PA', league: League.nfl),
+  Stadium(id: 'lumen-field', name: 'Lumen Field', team: 'Seattle Seahawks', city: 'Seattle, WA', league: League.nfl),
+  Stadium(id: 'levis-stadium', name: "Levi's Stadium", team: 'San Francisco 49ers', city: 'Santa Clara, CA', league: League.nfl),
+  Stadium(id: 'raymond-james-stadium', name: 'Raymond James Stadium', team: 'Tampa Bay Buccaneers', city: 'Tampa, FL', league: League.nfl),
+  Stadium(id: 'nissan-stadium', name: 'Nissan Stadium', team: 'Tennessee Titans', city: 'Nashville, TN', league: League.nfl),
+  Stadium(id: 'northwest-stadium', name: 'Northwest Stadium', team: 'Washington Commanders', city: 'Landover, MD', league: League.nfl),
+]..sort((a, b) => a.team.compareTo(b.team));
+
+final List<Stadium> kStadiums = [...kMlbStadiums, ...kNflStadiums]
+  ..sort((a, b) => a.team.compareTo(b.team));

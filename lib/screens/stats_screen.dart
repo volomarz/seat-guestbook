@@ -93,7 +93,7 @@ class _StatsScreenState extends State<StatsScreen> {
             crossAxisSpacing: 10,
             childAspectRatio: 1.4,
             children: [
-              _StatBox(num: '$stadiumsVisited/30', label: 'Stadiums visited'),
+              _StatBox(num: '$stadiumsVisited/${kStadiums.length}', label: 'Stadiums visited'),
               _StatBox(num: '$seatsSigned', label: 'Unique seats signed'),
               _StatBox(num: '${sigs.length}', label: 'Total signatures'),
               _StatBox(num: '$names', label: 'Different signers'),

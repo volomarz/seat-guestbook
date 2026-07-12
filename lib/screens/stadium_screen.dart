@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/league.dart';
 import '../models/signature.dart';
 import '../models/stadium.dart';
 import '../models/venue_event.dart';
@@ -72,7 +73,12 @@ class _StadiumScreenState extends State<StadiumScreen> {
       ),
       child: Row(
         children: [
-          Icon(isGame ? Icons.sports_baseball : Icons.music_note,
+          Icon(
+              isGame
+                  ? (widget.stadium.league == League.nfl
+                      ? Icons.sports_football
+                      : Icons.sports_baseball)
+                  : Icons.music_note,
               color: isGame ? AppColors.green : AppColors.dirt, size: 22),
           const SizedBox(width: 10),
           Expanded(

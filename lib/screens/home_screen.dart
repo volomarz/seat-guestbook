@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/league.dart';
 import '../models/stadium.dart';
 import '../services/signatures_store.dart';
 import '../theme.dart';
@@ -17,21 +18,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _query = '';
+  League? _leagueFilter; // null = show all leagues
 
   @override
   Widget build(BuildContext context) {
     final store = context.watch<SignaturesStore>();
     final query = _query.trim().toLowerCase();
-    final filtered = query.isEmpty
-        ? kStadiums
-        : kStadiums
-            .where((s) =>
-                (s.name + s.team + s.city).toLowerCase().contains(query))
-            .toList();
+    final filtered = kStadiums.where((s) {
+      final matchesLeague = _leagueFilter == null || s.league == _leagueFilter;
+      final matchesQuery = query.isEmpty ||
+          (s.name + s.team + s.city).toLowerCase().contains(query);
+      return matchesLeague && matchesQuery;
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('⚾ Ballpark Guestbook'),
+        title: const Text('🏟️ Seat Guestbook'),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
@@ -63,6 +65,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 hintText: 'Search stadium, team, or city...',
               ),
               onChanged: (v) => setState(() => _query = v),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                _leagueChip(null, 'All'),
+                const SizedBox(width: 8),
+                _leagueChip(League.mlb, '${League.mlb.emoji} MLB'),
+                const SizedBox(width: 8),
+                _leagueChip(League.nfl, '${League.nfl.emoji} NFL'),
+              ],
             ),
             const SizedBox(height: 14),
             Expanded(
@@ -118,6 +130,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _leagueChip(League? league, String label) {
+    final selected = _leagueFilter == league;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => setState(() => _leagueFilter = league),
+      selectedColor: AppColors.green,
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : AppColors.ink,
+        fontWeight: FontWeight.w600,
+      ),
+      backgroundColor: Colors.white,
+      side: const BorderSide(color: AppColors.line),
     );
   }
 }
