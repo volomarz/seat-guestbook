@@ -12,8 +12,6 @@ class StorageService {
   static CollectionReference<Map<String, dynamic>> get _collection =>
       _db.collection('signatures');
 
-  /// Makes sure this device has an anonymous Firebase Auth identity, and
-  /// returns its uid. Safe to call repeatedly.
   static Future<String> ensureSignedIn() async {
     final current = _auth.currentUser;
     if (current != null) return current.uid;
@@ -23,7 +21,6 @@ class StorageService {
 
   static String? get currentUserId => _auth.currentUser?.uid;
 
-  /// Live stream of every non-reported signature, newest first.
   static Stream<List<SeatSignature>> watchSignatures() {
     return _collection.orderBy('createdAt', descending: true).snapshots().map(
           (snap) => snap.docs
@@ -45,12 +42,15 @@ class StorageService {
     await _collection.doc(id).update({'reported': true});
   }
 
-  /// Uploads a local photo file to Cloud Storage and returns its public
-  /// download URL.
-  static Future<String> uploadPhoto(String localPath, String signatureId) async {
-    final ext = localPath.split('.').last;
-    final ref = _storage.ref().child('seat_photos/$signatureId.$ext');
-    await ref.putFile(File(localPath));
-    return ref.getDownloadURL();
+  static Future<List<String>> uploadPhotos(
+      List<String> localPaths, String signatureId) async {
+    final urls = <String>[];
+    for (var i = 0; i < localPaths.length; i++) {
+      final ext = localPaths[i].split('.').last;
+      final ref = _storage.ref().child('seat_photos/${signatureId}_$i.$ext');
+      await ref.putFile(File(localPaths[i]));
+      urls.add(await ref.getDownloadURL());
+    }
+    return urls;
   }
 }

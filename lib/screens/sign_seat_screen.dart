@@ -20,13 +20,15 @@ class SignSeatScreen extends StatefulWidget {
 }
 
 class _SignSeatScreenState extends State<SignSeatScreen> {
+  static const int _maxPhotos = 6;
+
   final _sectionCtrl = TextEditingController();
   final _rowCtrl = TextEditingController();
   final _seatCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
   DateTime _date = DateTime.now();
-  String? _photoPath; // local temp path from picker, before upload
+  final List<String> _photoPaths = []; // local temp paths from picker, before upload
   String? _favoriteTeam;
   bool _saving = false;
 
@@ -57,9 +59,9 @@ class _SignSeatScreenState extends State<SignSeatScreen> {
     super.dispose();
   }
 
-  Future<void> _pickPhoto() async {
+  Future<void> _addPhotos() async {
     final picker = ImagePicker();
-    final source = await showModalBottomSheet<ImageSource>(
+    final choice = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Wrap(
@@ -67,23 +69,44 @@ class _SignSeatScreenState extends State<SignSeatScreen> {
             ListTile(
               leading: const Icon(Icons.camera_alt),
               title: const Text('Take photo'),
-              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              onTap: () => Navigator.pop(ctx, 'camera'),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
               title: const Text('Choose from library'),
-              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              onTap: () => Navigator.pop(ctx, 'gallery'),
             ),
           ],
         ),
       ),
     );
-    if (source == null) return;
-    final picked =
-        await picker.pickImage(source: source, imageQuality: 70, maxWidth: 1080);
-    if (picked != null) {
-      setState(() => _photoPath = picked.path);
+    if (choice == null) return;
+
+    List<String> newPaths = [];
+    if (choice == 'camera') {
+      final picked = await picker.pickImage(
+          source: ImageSource.camera, imageQuality: 70, maxWidth: 1080);
+      if (picked != null) newPaths = [picked.path];
+    } else {
+      final picked = await picker.pickMultiImage(imageQuality: 70, maxWidth: 1080);
+      newPaths = picked.map((x) => x.path).toList();
     }
+    if (newPaths.isEmpty) return;
+
+    setState(() {
+      final remaining = _maxPhotos - _photoPaths.length;
+      _photoPaths.addAll(newPaths.take(remaining));
+    });
+
+    if (_photoPaths.length >= _maxPhotos && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Up to $_maxPhotos photos per signature.')),
+      );
+    }
+  }
+
+  void _removePhoto(int index) {
+    setState(() => _photoPaths.removeAt(index));
   }
 
   Future<void> _pickDate() async {
@@ -113,9 +136,9 @@ class _SignSeatScreenState extends State<SignSeatScreen> {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       final dateStr = DateFormat('yyyy-MM-dd').format(_date);
 
-      String? photoUrl;
-      if (_photoPath != null) {
-        photoUrl = await StorageService.uploadPhoto(_photoPath!, id);
+      List<String> photoUrls = [];
+      if (_photoPaths.isNotEmpty) {
+        photoUrls = await StorageService.uploadPhotos(_photoPaths, id);
       }
 
       final gameSummary =
@@ -130,7 +153,7 @@ class _SignSeatScreenState extends State<SignSeatScreen> {
         name: _nameCtrl.text.trim(),
         date: dateStr,
         note: _noteCtrl.text.trim(),
-        photoUrl: photoUrl,
+        photoUrls: photoUrls,
         ownerId: ownerId,
         createdAt: DateTime.now().millisecondsSinceEpoch,
         gameSummary: gameSummary,
@@ -183,22 +206,50 @@ class _SignSeatScreenState extends State<SignSeatScreen> {
             decoration: const InputDecoration(hintText: 'Any memory from the seat...'),
           ),
           const SizedBox(height: 18),
-          OutlinedButton(
-            onPressed: _pickPhoto,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.green,
-              side: const BorderSide(color: AppColors.green),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-            child: Text(_photoPath == null ? '+ Add photo / selfie' : 'Change photo'),
+          _fieldLabel('Photos (optional, up to $_maxPhotos)'),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (var i = 0; i < _photoPaths.length; i++)
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(File(_photoPaths[i]),
+                          width: 90, height: 90, fit: BoxFit.cover),
+                    ),
+                    Positioned(
+                      top: -6,
+                      right: -6,
+                      child: GestureDetector(
+                        onTap: () => _removePhoto(i),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                              color: AppColors.red, shape: BoxShape.circle),
+                          padding: const EdgeInsets.all(4),
+                          child: const Icon(Icons.close, size: 14, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              if (_photoPaths.length < _maxPhotos)
+                InkWell(
+                  onTap: _addPhotos,
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.green),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.add_a_photo, color: AppColors.green),
+                  ),
+                ),
+            ],
           ),
-          if (_photoPath != null) ...[
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(File(_photoPath!), width: 100, height: 100, fit: BoxFit.cover),
-            ),
-          ],
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,

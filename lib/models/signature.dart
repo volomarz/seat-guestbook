@@ -7,7 +7,7 @@ class SeatSignature {
   final String name;
   final String date; // yyyy-MM-dd
   final String note;
-  final String? photoUrl; // Cloud Storage download URL, or null
+  final List<String> photoUrls; // Cloud Storage download URLs, may be empty
   final String ownerId; // Firebase Auth uid of whoever created this
   final bool reported;
   final int createdAt;
@@ -23,13 +23,13 @@ class SeatSignature {
     required this.name,
     required this.date,
     required this.note,
-    required this.photoUrl,
+    List<String>? photoUrls,
     required this.ownerId,
     this.reported = false,
     required this.createdAt,
     this.gameSummary,
     this.signerFavoriteTeam,
-  });
+  }) : photoUrls = photoUrls ?? [];
 
   String get seatKey =>
       '${section.trim().toUpperCase()}|${row.trim().toUpperCase()}|${seat.trim().toUpperCase()}';
@@ -43,7 +43,7 @@ class SeatSignature {
         'name': name,
         'date': date,
         'note': note,
-        'photoUrl': photoUrl,
+        'photoUrls': photoUrls,
         'ownerId': ownerId,
         'reported': reported,
         'createdAt': createdAt,
@@ -51,20 +51,31 @@ class SeatSignature {
         'signerFavoriteTeam': signerFavoriteTeam,
       };
 
-  factory SeatSignature.fromJson(Map<String, dynamic> json) => SeatSignature(
-        id: json['id'] as String? ?? '',
-        stadiumId: json['stadiumId'] as String? ?? '',
-        section: json['section'] as String? ?? '',
-        row: json['row'] as String? ?? '',
-        seat: json['seat'] as String? ?? '',
-        name: json['name'] as String? ?? '',
-        date: json['date'] as String? ?? '',
-        note: json['note'] as String? ?? '',
-        photoUrl: json['photoUrl'] as String?,
-        ownerId: json['ownerId'] as String? ?? '',
-        reported: json['reported'] as bool? ?? false,
-        createdAt: json['createdAt'] as int? ?? 0,
-        gameSummary: json['gameSummary'] as String?,
-        signerFavoriteTeam: json['signerFavoriteTeam'] as String?,
-      );
+  factory SeatSignature.fromJson(Map<String, dynamic> json) {
+    List<String> photoUrls;
+    final rawList = json['photoUrls'] as List<dynamic>?;
+    if (rawList != null) {
+      photoUrls = rawList.map((e) => e as String).toList();
+    } else {
+      // Backward compatibility with seats signed before multi-photo support.
+      final legacy = json['photoUrl'] as String?;
+      photoUrls = legacy != null ? [legacy] : [];
+    }
+    return SeatSignature(
+      id: json['id'] as String? ?? '',
+      stadiumId: json['stadiumId'] as String? ?? '',
+      section: json['section'] as String? ?? '',
+      row: json['row'] as String? ?? '',
+      seat: json['seat'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      date: json['date'] as String? ?? '',
+      note: json['note'] as String? ?? '',
+      photoUrls: photoUrls,
+      ownerId: json['ownerId'] as String? ?? '',
+      reported: json['reported'] as bool? ?? false,
+      createdAt: json['createdAt'] as int? ?? 0,
+      gameSummary: json['gameSummary'] as String?,
+      signerFavoriteTeam: json['signerFavoriteTeam'] as String?,
+    );
+  }
 }

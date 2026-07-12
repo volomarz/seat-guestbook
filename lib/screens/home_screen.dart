@@ -5,6 +5,7 @@ import '../services/signatures_store.dart';
 import '../theme.dart';
 import 'profile_screen.dart';
 import 'stadium_screen.dart';
+import 'standings_screen.dart';
 import 'stats_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -38,6 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const ProfileScreen()),
             ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const StandingsScreen()),
+            ),
+            child: const Text('Standings', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).push(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/stadium.dart';
+import '../services/notification_service.dart';
 import '../services/profile_service.dart';
 import '../theme.dart';
 
@@ -33,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _save() async {
     await ProfileService.saveProfile(name: _nameCtrl.text.trim(), favoriteTeam: _favoriteTeam);
+    await NotificationService.scheduleGameDayReminder(_favoriteTeam);
     if (mounted) Navigator.of(context).pop();
   }
 

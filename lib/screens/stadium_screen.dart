@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/signature.dart';
 import '../models/stadium.dart';
+import '../models/venue_event.dart';
+import '../services/next_event_service.dart';
 import '../services/signatures_store.dart';
 import '../theme.dart';
 import 'photo_viewer_screen.dart';
@@ -15,9 +17,30 @@ class SeatGroup {
   SeatGroup(this.section, this.row, this.seat, this.items);
 }
 
-class StadiumScreen extends StatelessWidget {
+class StadiumScreen extends StatefulWidget {
   final Stadium stadium;
   const StadiumScreen({super.key, required this.stadium});
+
+  @override
+  State<StadiumScreen> createState() => _StadiumScreenState();
+}
+
+class _StadiumScreenState extends State<StadiumScreen> {
+  late Future<VenueEvent?> _nextEventFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _nextEventFuture = NextEventService.fetchNextEvent(widget.stadium);
+  }
+
+  bool _isToday(int createdAtMillis) {
+    final createdAt = DateTime.fromMillisecondsSinceEpoch(createdAtMillis);
+    final now = DateTime.now();
+    return createdAt.year == now.year &&
+        createdAt.month == now.month &&
+        createdAt.day == now.day;
+  }
 
   List<SeatGroup> _groupSignatures(List<SeatSignature> sigs) {
     final map = <String, SeatGroup>{};
@@ -35,19 +58,96 @@ class StadiumScreen extends StatelessWidget {
     return groups;
   }
 
+  Widget _buildNextEventBanner(VenueEvent? event) {
+    if (event == null) return const SizedBox.shrink();
+    final isGame = event.type == VenueEventType.game;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: (isGame ? AppColors.green : AppColors.dirt).withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Row(
+        children: [
+          Icon(isGame ? Icons.sports_baseball : Icons.music_note,
+              color: isGame ? AppColors.green : AppColors.dirt, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isGame ? 'NEXT GAME' : 'NEXT EVENT',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 11, color: AppColors.muted),
+                ),
+                const SizedBox(height: 2),
+                Text(event.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(event.subtitle,
+                    style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTodayActivityBanner(int count) {
+    if (count == 0) return const SizedBox.shrink();
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.green.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.groups, color: AppColors.green, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              count == 1
+                  ? '1 person has signed in here today'
+                  : '$count people have signed in here today',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = context.watch<SignaturesStore>();
-    final sigs = store.forStadium(stadium.id);
+    final sigs = store.forStadium(widget.stadium.id);
     final groups = _groupSignatures(sigs);
     final myId = store.userId;
+    final todayCount = sigs.where((s) => _isToday(s.createdAt)).length;
 
     return Scaffold(
-      appBar: AppBar(title: Text(stadium.name)),
+      appBar: AppBar(title: Text(widget.stadium.name)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            FutureBuilder<VenueEvent?>(
+              future: _nextEventFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const SizedBox.shrink();
+                }
+                return _buildNextEventBanner(snapshot.data);
+              },
+            ),
+            _buildTodayActivityBanner(todayCount),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -61,7 +161,7 @@ class StadiumScreen extends StatelessWidget {
                 ),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => SignSeatScreen(stadium: stadium),
+                    builder: (_) => SignSeatScreen(stadium: widget.stadium),
                   ),
                 ),
                 child: const Text('+ Sign a seat',
@@ -104,28 +204,52 @@ class StadiumScreen extends StatelessWidget {
                                       child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          if (sig.photoUrl != null)
+                                          if (sig.photoUrls.isNotEmpty)
                                             Padding(
                                               padding: const EdgeInsets.only(right: 10),
                                               child: GestureDetector(
                                                 onTap: () => Navigator.of(context).push(
                                                   MaterialPageRoute(
                                                     builder: (_) => PhotoViewerScreen(
-                                                      photoUrl: sig.photoUrl!,
+                                                      photoUrls: sig.photoUrls,
                                                       caption: '${sig.name} · ${sig.date}',
                                                     ),
                                                   ),
                                                 ),
-                                                child: ClipRRect(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  child: Image.network(
-                                                    sig.photoUrl!,
-                                                    width: 52,
-                                                    height: 52,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (_, __, ___) =>
-                                                        const SizedBox(width: 52, height: 52),
-                                                  ),
+                                                child: Stack(
+                                                  children: [
+                                                    ClipRRect(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                      child: Image.network(
+                                                        sig.photoUrls.first,
+                                                        width: 52,
+                                                        height: 52,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (_, __, ___) =>
+                                                            const SizedBox(width: 52, height: 52),
+                                                      ),
+                                                    ),
+                                                    if (sig.photoUrls.length > 1)
+                                                      Positioned(
+                                                        bottom: 2,
+                                                        right: 2,
+                                                        child: Container(
+                                                          padding: const EdgeInsets.symmetric(
+                                                              horizontal: 5, vertical: 1),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.black.withOpacity(0.65),
+                                                            borderRadius: BorderRadius.circular(6),
+                                                          ),
+                                                          child: Text(
+                                                            '+${sig.photoUrls.length - 1}',
+                                                            style: const TextStyle(
+                                                                color: Colors.white,
+                                                                fontSize: 10,
+                                                                fontWeight: FontWeight.w700),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
@@ -144,6 +268,14 @@ class StadiumScreen extends StatelessWidget {
                                                     style: const TextStyle(
                                                         color: AppColors.muted, fontSize: 12),
                                                   ),
+                                                  if (_isToday(sig.createdAt))
+                                                    const TextSpan(
+                                                      text: '  · Today',
+                                                      style: TextStyle(
+                                                          color: AppColors.green,
+                                                          fontSize: 12,
+                                                          fontWeight: FontWeight.w700),
+                                                    ),
                                                 ])),
                                                 if (sig.note.isNotEmpty)
                                                   Text(sig.note,
