@@ -3,8 +3,56 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import '../config/api_keys.dart';
 import '../models/venue_event.dart';
+import '../models/venue_search_result.dart';
 
 class TicketmasterService {
+  /// Looks up real venues by name (any venue Ticketmaster knows about, not
+  /// just a fixed list) — used for the "find a concert venue" search.
+  /// Returns an empty list if the query is too short or the lookup fails.
+  static Future<List<VenueSearchResult>> searchVenues(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.length < 2) return [];
+
+    final url = Uri.parse(
+      'https://app.ticketmaster.com/discovery/v2/venues.json'
+      '?apikey=$kTicketmasterApiKey&keyword=${Uri.encodeComponent(trimmed)}&size=20',
+    );
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return [];
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final embedded = data['_embedded'] as Map<String, dynamic>?;
+      final venues = embedded?['venues'] as List<dynamic>?;
+      if (venues == null) return [];
+
+      final results = <VenueSearchResult>[];
+      final seen = <String>{};
+      for (final v in venues) {
+        final venue = v as Map<String, dynamic>;
+        final id = venue['id'] as String?;
+        final name = venue['name'] as String?;
+        final city = (venue['city'] as Map<String, dynamic>?)?['name'] as String?;
+        if (id == null || name == null || city == null) {
+          continue; // skip low-quality/duplicate entries missing basic info
+        }
+        final state = (venue['state'] as Map<String, dynamic>?)?['stateCode'] as String? ?? '';
+        final dedupeKey = '${name.toLowerCase()}|${city.toLowerCase()}';
+        if (!seen.add(dedupeKey)) continue;
+
+        results.add(VenueSearchResult(
+          ticketmasterId: id,
+          name: name,
+          city: city,
+          state: state,
+        ));
+        if (results.length >= 15) break;
+      }
+      return results;
+    } catch (_) {
+      return [];
+    }
+  }
+
   /// Finds the next non-sports event (concert, etc.) at the venue matching
   /// [venueName]/[city]. Returns null if none is found or the lookup fails.
   static Future<VenueEvent?> fetchNextEvent(String venueName, String city) async {

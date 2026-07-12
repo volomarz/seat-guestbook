@@ -91,5 +91,43 @@ final List<Stadium> kNflStadiums = [
   Stadium(id: 'northwest-stadium', name: 'Northwest Stadium', team: 'Washington Commanders', city: 'Landover, MD', league: League.nfl),
 ]..sort((a, b) => a.team.compareTo(b.team));
 
-final List<Stadium> kStadiums = [...kMlbStadiums, ...kNflStadiums]
+// NHL arena names current as of the 2025-26 season (several arenas were
+// renamed under new sponsorship deals in 2025: Tampa Bay's, Philadelphia's,
+// and Minnesota's).
+final List<Stadium> kNhlStadiums = [
+  Stadium(id: 'honda-center', name: 'Honda Center', team: 'Anaheim Ducks', city: 'Anaheim, CA', league: League.nhl),
+  Stadium(id: 'td-garden', name: 'TD Garden', team: 'Boston Bruins', city: 'Boston, MA', league: League.nhl),
+  Stadium(id: 'keybank-center', name: 'KeyBank Center', team: 'Buffalo Sabres', city: 'Buffalo, NY', league: League.nhl),
+  Stadium(id: 'scotiabank-saddledome', name: 'Scotiabank Saddledome', team: 'Calgary Flames', city: 'Calgary, AB', league: League.nhl),
+  Stadium(id: 'lenovo-center', name: 'Lenovo Center', team: 'Carolina Hurricanes', city: 'Raleigh, NC', league: League.nhl),
+  Stadium(id: 'united-center', name: 'United Center', team: 'Chicago Blackhawks', city: 'Chicago, IL', league: League.nhl),
+  Stadium(id: 'ball-arena', name: 'Ball Arena', team: 'Colorado Avalanche', city: 'Denver, CO', league: League.nhl),
+  Stadium(id: 'nationwide-arena', name: 'Nationwide Arena', team: 'Columbus Blue Jackets', city: 'Columbus, OH', league: League.nhl),
+  Stadium(id: 'american-airlines-center', name: 'American Airlines Center', team: 'Dallas Stars', city: 'Dallas, TX', league: League.nhl),
+  Stadium(id: 'little-caesars-arena', name: 'Little Caesars Arena', team: 'Detroit Red Wings', city: 'Detroit, MI', league: League.nhl),
+  Stadium(id: 'rogers-place', name: 'Rogers Place', team: 'Edmonton Oilers', city: 'Edmonton, AB', league: League.nhl),
+  Stadium(id: 'amerant-bank-arena', name: 'Amerant Bank Arena', team: 'Florida Panthers', city: 'Sunrise, FL', league: League.nhl),
+  Stadium(id: 'crypto-com-arena', name: 'Crypto.com Arena', team: 'Los Angeles Kings', city: 'Los Angeles, CA', league: League.nhl),
+  Stadium(id: 'grand-casino-arena', name: 'Grand Casino Arena', team: 'Minnesota Wild', city: 'Saint Paul, MN', league: League.nhl),
+  Stadium(id: 'bell-centre', name: 'Bell Centre', team: 'Montreal Canadiens', city: 'Montreal, QC', league: League.nhl),
+  Stadium(id: 'bridgestone-arena', name: 'Bridgestone Arena', team: 'Nashville Predators', city: 'Nashville, TN', league: League.nhl),
+  Stadium(id: 'prudential-center', name: 'Prudential Center', team: 'New Jersey Devils', city: 'Newark, NJ', league: League.nhl),
+  Stadium(id: 'ubs-arena', name: 'UBS Arena', team: 'New York Islanders', city: 'Elmont, NY', league: League.nhl),
+  Stadium(id: 'madison-square-garden', name: 'Madison Square Garden', team: 'New York Rangers', city: 'New York, NY', league: League.nhl),
+  Stadium(id: 'canadian-tire-centre', name: 'Canadian Tire Centre', team: 'Ottawa Senators', city: 'Ottawa, ON', league: League.nhl),
+  Stadium(id: 'xfinity-mobile-arena', name: 'Xfinity Mobile Arena', team: 'Philadelphia Flyers', city: 'Philadelphia, PA', league: League.nhl),
+  Stadium(id: 'ppg-paints-arena', name: 'PPG Paints Arena', team: 'Pittsburgh Penguins', city: 'Pittsburgh, PA', league: League.nhl),
+  Stadium(id: 'sap-center', name: 'SAP Center', team: 'San Jose Sharks', city: 'San Jose, CA', league: League.nhl),
+  Stadium(id: 'climate-pledge-arena', name: 'Climate Pledge Arena', team: 'Seattle Kraken', city: 'Seattle, WA', league: League.nhl),
+  Stadium(id: 'enterprise-center', name: 'Enterprise Center', team: 'St. Louis Blues', city: 'St. Louis, MO', league: League.nhl),
+  Stadium(id: 'benchmark-international-arena', name: 'Benchmark International Arena', team: 'Tampa Bay Lightning', city: 'Tampa, FL', league: League.nhl),
+  Stadium(id: 'scotiabank-arena', name: 'Scotiabank Arena', team: 'Toronto Maple Leafs', city: 'Toronto, ON', league: League.nhl),
+  Stadium(id: 'delta-center', name: 'Delta Center', team: 'Utah Mammoth', city: 'Salt Lake City, UT', league: League.nhl),
+  Stadium(id: 'rogers-arena', name: 'Rogers Arena', team: 'Vancouver Canucks', city: 'Vancouver, BC', league: League.nhl),
+  Stadium(id: 't-mobile-arena', name: 'T-Mobile Arena', team: 'Vegas Golden Knights', city: 'Paradise, NV', league: League.nhl),
+  Stadium(id: 'capital-one-arena', name: 'Capital One Arena', team: 'Washington Capitals', city: 'Washington, D.C.', league: League.nhl),
+  Stadium(id: 'canada-life-centre', name: 'Canada Life Centre', team: 'Winnipeg Jets', city: 'Winnipeg, MB', league: League.nhl),
+]..sort((a, b) => a.team.compareTo(b.team));
+
+final List<Stadium> kStadiums = [...kMlbStadiums, ...kNflStadiums, ...kNhlStadiums]
   ..sort((a, b) => a.team.compareTo(b.team));

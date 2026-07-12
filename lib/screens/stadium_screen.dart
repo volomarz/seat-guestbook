@@ -59,6 +59,19 @@ class _StadiumScreenState extends State<StadiumScreen> {
     return groups;
   }
 
+  IconData _gameIcon() {
+    switch (widget.stadium.league) {
+      case League.nfl:
+        return Icons.sports_football;
+      case League.nhl:
+        return Icons.sports_hockey;
+      case League.mlb:
+      case League.concert:
+      case League.nascar:
+        return Icons.sports_baseball;
+    }
+  }
+
   Widget _buildNextEventBanner(VenueEvent? event) {
     if (event == null) return const SizedBox.shrink();
     final isGame = event.type == VenueEventType.game;
@@ -73,12 +86,7 @@ class _StadiumScreenState extends State<StadiumScreen> {
       ),
       child: Row(
         children: [
-          Icon(
-              isGame
-                  ? (widget.stadium.league == League.nfl
-                      ? Icons.sports_football
-                      : Icons.sports_baseball)
-                  : Icons.music_note,
+          Icon(isGame ? _gameIcon() : Icons.music_note,
               color: isGame ? AppColors.green : AppColors.dirt, size: 22),
           const SizedBox(width: 10),
           Expanded(

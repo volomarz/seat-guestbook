@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../models/league.dart';
 import '../models/signature.dart';
 import '../models/stadium.dart';
+import '../services/recent_venues_service.dart';
 import '../services/signatures_store.dart';
 import '../theme.dart';
 
@@ -18,6 +20,15 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   bool _mineOnly = false;
+  List<Stadium> _recentVenues = [];
+
+  @override
+  void initState() {
+    super.initState();
+    RecentVenuesService.getRecent().then((venues) {
+      if (mounted) setState(() => _recentVenues = venues);
+    });
+  }
 
   Future<void> _export(BuildContext context, List<SeatSignature> sigs) async {
     final dir = await getTemporaryDirectory();
@@ -44,8 +55,10 @@ class _StatsScreenState extends State<StatsScreen> {
     final names =
         sigs.map((s) => s.name.trim().toLowerCase()).where((n) => n.isNotEmpty).toSet().length;
 
-    final perStadium = kStadiums
-        .map((s) => MapEntry(s.team, sigs.where((sig) => sig.stadiumId == s.id).length))
+    final allVenues = [...kStadiums, ..._recentVenues];
+    final perStadium = allVenues
+        .map((s) => MapEntry(s.league == League.concert ? s.name : s.team,
+            sigs.where((sig) => sig.stadiumId == s.id).length))
         .where((e) => e.value > 0)
         .toList()
       ..sort((a, b) => b.value.compareTo(a.value));

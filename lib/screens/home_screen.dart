@@ -8,6 +8,7 @@ import 'profile_screen.dart';
 import 'stadium_screen.dart';
 import 'standings_screen.dart';
 import 'stats_screen.dart';
+import 'venue_search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -67,13 +68,30 @@ class _HomeScreenState extends State<HomeScreen> {
               onChanged: (v) => setState(() => _query = v),
             ),
             const SizedBox(height: 10),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 _leagueChip(null, 'All'),
-                const SizedBox(width: 8),
                 _leagueChip(League.mlb, '${League.mlb.emoji} MLB'),
-                const SizedBox(width: 8),
                 _leagueChip(League.nfl, '${League.nfl.emoji} NFL'),
+                _leagueChip(League.nhl, '${League.nhl.emoji} NHL'),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Text('Or search: ',
+                    style: TextStyle(color: AppColors.muted, fontSize: 12.5)),
+                _searchLink(
+                  label: '${League.concert.emoji} Concerts',
+                  league: League.concert,
+                ),
+                const SizedBox(width: 14),
+                _searchLink(
+                  label: '${League.nascar.emoji} NASCAR',
+                  league: League.nascar,
+                ),
               ],
             ),
             const SizedBox(height: 14),
@@ -146,6 +164,23 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       backgroundColor: Colors.white,
       side: const BorderSide(color: AppColors.line),
+    );
+  }
+
+  Widget _searchLink({required String label, required League league}) {
+    return InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => VenueSearchScreen(league: league)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: AppColors.green,
+          fontWeight: FontWeight.w700,
+          fontSize: 12.5,
+          decoration: TextDecoration.underline,
+        ),
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import '../models/league.dart';
 import '../models/standings.dart';
 import '../models/super_bowl_result.dart';
 import '../services/nfl_standings_service.dart';
+import '../services/nhl_standings_service.dart';
 import '../services/standings_service.dart';
 import '../theme.dart';
 
@@ -29,20 +30,42 @@ class _StandingsScreenState extends State<StandingsScreen> {
     if (league == _league) return;
     setState(() {
       _league = league;
-      if (league == League.mlb) {
-        _future = StandingsService.fetchStandings();
-        _superBowlFuture = null;
-      } else {
-        _future = NflStandingsService.fetchStandings();
-        _superBowlFuture =
-            NflStandingsService.fetchSuperBowlResult(NflStandingsService.currentSeason());
+      _superBowlFuture = null;
+      switch (league) {
+        case League.mlb:
+          _future = StandingsService.fetchStandings();
+          break;
+        case League.nfl:
+          _future = NflStandingsService.fetchStandings();
+          _superBowlFuture =
+              NflStandingsService.fetchSuperBowlResult(NflStandingsService.currentSeason());
+          break;
+        case League.nhl:
+          _future = NhlStandingsService.fetchStandings();
+          break;
+        case League.concert:
+        case League.nascar:
+          break; // not shown here — Standings only covers browsable leagues
       }
     });
   }
 
-  int get _seasonYear => _league == League.mlb
-      ? StandingsService.currentSeason()
-      : NflStandingsService.currentSeason();
+  /// NHL seasons span two calendar years, so "2026 season" would be
+  /// ambiguous — show it as "2025-26 season" instead.
+  String get _seasonLabel {
+    switch (_league) {
+      case League.mlb:
+        return '${StandingsService.currentSeason()} season';
+      case League.nfl:
+        return '${NflStandingsService.currentSeason()} season';
+      case League.nhl:
+        final end = NhlStandingsService.currentSeason();
+        return '${end - 1}-${(end % 100).toString().padLeft(2, '0')} season';
+      case League.concert:
+      case League.nascar:
+        return '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +83,10 @@ class _StandingsScreenState extends State<StandingsScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _leagueTab(League.nfl, '${League.nfl.emoji} NFL'),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _leagueTab(League.nhl, '${League.nhl.emoji} NHL'),
                 ),
               ],
             ),
@@ -116,7 +143,7 @@ class _StandingsScreenState extends State<StandingsScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '$_seasonYear season',
+                _seasonLabel,
                 style: const TextStyle(color: AppColors.muted, fontSize: 12.5),
               ),
             ),
@@ -174,8 +201,8 @@ class _StandingsScreenState extends State<StandingsScreen> {
                           4: FlexColumnWidth(1),
                         },
                         children: [
-                          const TableRow(children: [
-                            Padding(
+                          TableRow(children: [
+                            const Padding(
                               padding: EdgeInsets.symmetric(vertical: 4),
                               child: Text('Team',
                                   style: TextStyle(
@@ -184,7 +211,7 @@ class _StandingsScreenState extends State<StandingsScreen> {
                                       letterSpacing: 0.3,
                                       color: AppColors.ink)),
                             ),
-                            Padding(
+                            const Padding(
                               padding: EdgeInsets.symmetric(vertical: 4),
                               child: Text('W',
                                   style: TextStyle(
@@ -193,7 +220,7 @@ class _StandingsScreenState extends State<StandingsScreen> {
                                       letterSpacing: 0.3,
                                       color: AppColors.ink)),
                             ),
-                            Padding(
+                            const Padding(
                               padding: EdgeInsets.symmetric(vertical: 4),
                               child: Text('L',
                                   style: TextStyle(
@@ -203,9 +230,9 @@ class _StandingsScreenState extends State<StandingsScreen> {
                                       color: AppColors.ink)),
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric(vertical: 4),
-                              child: Text('PCT',
-                                  style: TextStyle(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Text(_league == League.nhl ? 'PTS' : 'PCT',
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.w800,
                                       fontSize: 12,
                                       letterSpacing: 0.3,
