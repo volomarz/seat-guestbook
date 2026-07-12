@@ -102,11 +102,81 @@ class TicketmasterService {
           title: name,
           subtitle: DateFormat('EEE, MMM d \u00b7 h:mm a').format(dt),
           dateTime: dt,
+          imageUrl: _bestImageUrl(event['images'] as List<dynamic>?),
+          venueName: _venueField(event, 'name') as String?,
+          venueAddress: _venueAddress(event),
+          priceRange: _priceRangeText(event['priceRanges'] as List<dynamic>?),
+          onsaleStatus: _onsaleStatusText(dates),
+          ticketUrl: event['url'] as String?,
         );
       }
       return null;
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Picks a good hero image: prefers a wide (16:9) shot, falls back to
+  /// whichever image is largest, since Ticketmaster returns a dozen+ crops.
+  static String? _bestImageUrl(List<dynamic>? images) {
+    if (images == null || images.isEmpty) return null;
+    final list = images.cast<Map<String, dynamic>>();
+    final wide = list.where((im) => im['ratio'] == '16_9').toList();
+    final pool = wide.isNotEmpty ? wide : list;
+    pool.sort((a, b) => ((b['width'] as int?) ?? 0).compareTo((a['width'] as int?) ?? 0));
+    return pool.first['url'] as String?;
+  }
+
+  static dynamic _venueField(Map<String, dynamic> event, String key) {
+    final embedded = event['_embedded'] as Map<String, dynamic>?;
+    final venues = embedded?['venues'] as List<dynamic>?;
+    if (venues == null || venues.isEmpty) return null;
+    return (venues.first as Map<String, dynamic>)[key];
+  }
+
+  static String? _venueAddress(Map<String, dynamic> event) {
+    final embedded = event['_embedded'] as Map<String, dynamic>?;
+    final venues = embedded?['venues'] as List<dynamic>?;
+    if (venues == null || venues.isEmpty) return null;
+    final venue = venues.first as Map<String, dynamic>;
+    final address = venue['address'] as Map<String, dynamic>?;
+    final line1 = address?['line1'] as String?;
+    final city = (venue['city'] as Map<String, dynamic>?)?['name'] as String?;
+    final state = (venue['state'] as Map<String, dynamic>?)?['stateCode'] as String?;
+    final parts = [line1, [city, state].where((s) => s != null && s.isNotEmpty).join(', ')]
+        .where((s) => s != null && s.isNotEmpty)
+        .toList();
+    return parts.isEmpty ? null : parts.join('\n');
+  }
+
+  static String? _priceRangeText(List<dynamic>? priceRanges) {
+    if (priceRanges == null || priceRanges.isEmpty) return null;
+    final range = priceRanges.first as Map<String, dynamic>;
+    final min = range['min'];
+    final max = range['max'];
+    final currency = range['currency'] as String? ?? 'USD';
+    final symbol = currency == 'USD' ? '\$' : '$currency ';
+    if (min == null || max == null) return null;
+    final minStr = (min as num).toStringAsFixed(0);
+    final maxStr = (max as num).toStringAsFixed(0);
+    return minStr == maxStr ? '$symbol$minStr' : '$symbol$minStr\u2013$symbol$maxStr';
+  }
+
+  static String? _onsaleStatusText(Map<String, dynamic>? dates) {
+    final code = (dates?['status'] as Map<String, dynamic>?)?['code'] as String?;
+    switch (code) {
+      case 'onsale':
+        return 'On sale now';
+      case 'offsale':
+        return 'Not currently on sale';
+      case 'cancelled':
+        return 'Cancelled';
+      case 'postponed':
+        return 'Postponed';
+      case 'rescheduled':
+        return 'Rescheduled';
+      default:
+        return null;
     }
   }
 

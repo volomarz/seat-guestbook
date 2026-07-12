@@ -7,6 +7,7 @@ import '../models/venue_event.dart';
 import '../services/next_event_service.dart';
 import '../services/signatures_store.dart';
 import '../theme.dart';
+import 'event_details_screen.dart';
 import 'photo_viewer_screen.dart';
 import 'sign_seat_screen.dart';
 
@@ -75,37 +76,48 @@ class _StadiumScreenState extends State<StadiumScreen> {
   Widget _buildNextEventBanner(VenueEvent? event) {
     if (event == null) return const SizedBox.shrink();
     final isGame = event.type == VenueEventType.game;
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: (isGame ? AppColors.green : AppColors.dirt).withOpacity(0.08),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.line),
-      ),
-      child: Row(
-        children: [
-          Icon(isGame ? _gameIcon() : Icons.music_note,
-              color: isGame ? AppColors.green : AppColors.dirt, size: 22),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isGame ? 'NEXT GAME' : 'NEXT EVENT',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 11, color: AppColors.muted),
-                ),
-                const SizedBox(height: 2),
-                Text(event.title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text(event.subtitle,
-                    style: const TextStyle(fontSize: 12, color: AppColors.muted)),
-              ],
+    final tappable = event.hasDetails;
+    return InkWell(
+      onTap: tappable
+          ? () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => EventDetailsScreen(event: event)),
+              )
+          : null,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: (isGame ? AppColors.green : AppColors.dirt).withOpacity(0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.line),
+        ),
+        child: Row(
+          children: [
+            Icon(isGame ? _gameIcon() : Icons.music_note,
+                color: isGame ? AppColors.green : AppColors.dirt, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isGame ? 'NEXT GAME' : 'NEXT EVENT',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 11, color: AppColors.muted),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(event.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(event.subtitle,
+                      style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+                ],
+              ),
             ),
-          ),
-        ],
+            if (tappable)
+              const Icon(Icons.chevron_right, color: AppColors.muted),
+          ],
+        ),
       ),
     );
   }
