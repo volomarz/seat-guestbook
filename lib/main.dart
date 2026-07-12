@@ -44,7 +44,7 @@ class _SeatGuestbookAppState extends State<SeatGuestbookApp> {
     return ChangeNotifierProvider<SignaturesStore>.value(
       value: _store,
       child: MaterialApp(
-        title: 'Seat Guestbook',
+        title: 'SeatShots',
         debugShowCheckedModeBanner: false,
         theme: buildAppTheme(),
         home: const HomeScreen(),

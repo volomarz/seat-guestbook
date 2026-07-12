@@ -1,11 +1,11 @@
 {
-    "name": "seat_guestbook",
-    "short_name": "seat_guestbook",
+    "name": "SeatShots",
+    "short_name": "SeatShots",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "SeatShots — sign seats at MLB, NFL, NHL, concerts, and NASCAR venues with a photo.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

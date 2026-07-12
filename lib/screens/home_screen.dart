@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🏟️ Seat Guestbook'),
+        title: const Text('📸 SeatShots'),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
