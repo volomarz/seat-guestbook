@@ -363,43 +363,88 @@ class _StadiumScreenState extends State<StadiumScreen> {
                                                       color: AppColors.dirt, fontSize: 12)),
                                             )
                                           else
-                                            TextButton(
-                                              onPressed: () async {
-                                                final confirmed = await showDialog<bool>(
-                                                  context: context,
-                                                  builder: (ctx) => AlertDialog(
-                                                    title: const Text('Report this signature?'),
-                                                    content: const Text(
-                                                        'It will be hidden from everyone while it gets reviewed.'),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(ctx, false),
-                                                        child: const Text('Cancel'),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(ctx, true),
-                                                        child: const Text('Report'),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                                if (confirmed == true) {
-                                                  await context
-                                                      .read<SignaturesStore>()
-                                                      .report(sig.id);
-                                                  if (context.mounted) {
-                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                        const SnackBar(
-                                                            content: Text(
-                                                                'Reported. Thanks for flagging it.')));
+                                            PopupMenuButton<String>(
+                                              padding: EdgeInsets.zero,
+                                              icon: const Icon(Icons.more_horiz,
+                                                  color: AppColors.muted, size: 18),
+                                              onSelected: (choice) async {
+                                                if (choice == 'report') {
+                                                  final confirmed = await showDialog<bool>(
+                                                    context: context,
+                                                    builder: (ctx) => AlertDialog(
+                                                      title:
+                                                          const Text('Report this signature?'),
+                                                      content: const Text(
+                                                          'It will be hidden from everyone while it gets reviewed.'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(ctx, false),
+                                                          child: const Text('Cancel'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(ctx, true),
+                                                          child: const Text('Report'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                  if (confirmed == true) {
+                                                    await context
+                                                        .read<SignaturesStore>()
+                                                        .report(sig.id);
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                          const SnackBar(
+                                                              content: Text(
+                                                                  'Reported. Thanks for flagging it.')));
+                                                    }
+                                                  }
+                                                } else if (choice == 'block') {
+                                                  final confirmed = await showDialog<bool>(
+                                                    context: context,
+                                                    builder: (ctx) => AlertDialog(
+                                                      title: Text('Block ${sig.name}?'),
+                                                      content: const Text(
+                                                          "You won't see this person's signatures anymore. They won't be notified."),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(ctx, false),
+                                                          child: const Text('Cancel'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(ctx, true),
+                                                          child: const Text('Block'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                  if (confirmed == true) {
+                                                    await context
+                                                        .read<SignaturesStore>()
+                                                        .block(sig.ownerId, sig.name);
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                          SnackBar(
+                                                              content:
+                                                                  Text('Blocked ${sig.name}.')));
+                                                    }
                                                   }
                                                 }
                                               },
-                                              child: const Text('report',
-                                                  style: TextStyle(
-                                                      color: AppColors.muted, fontSize: 12)),
+                                              itemBuilder: (context) => const [
+                                                PopupMenuItem(
+                                                  value: 'report',
+                                                  child: Text('Report'),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 'block',
+                                                  child: Text('Block this person'),
+                                                ),
+                                              ],
                                             ),
                                         ],
                                       ),

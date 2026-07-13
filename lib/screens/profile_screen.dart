@@ -4,6 +4,7 @@ import '../models/stadium.dart';
 import '../services/notification_service.dart';
 import '../services/profile_service.dart';
 import '../theme.dart';
+import 'blocked_users_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -101,6 +102,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               onPressed: _save,
               child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const BlockedUsersScreen()),
+              ),
+              child: const Text('Blocked people'),
             ),
           ),
         ],
