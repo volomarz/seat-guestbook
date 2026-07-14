@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/league.dart';
 import '../models/stadium.dart';
 import '../services/notification_service.dart';
@@ -44,6 +45,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     _nameCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _openLink(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Could not open the link.')));
+    }
   }
 
   @override
@@ -112,6 +123,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 MaterialPageRoute(builder: (_) => const BlockedUsersScreen()),
               ),
               child: const Text('Blocked people'),
+            ),
+          ),
+          const Divider(color: AppColors.line, height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => _openLink('https://legal.getseatshots.com/'),
+              child: const Text('Privacy Policy'),
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => _openLink('https://legal.getseatshots.com/terms.html'),
+              child: const Text('Terms of Service'),
             ),
           ),
         ],
